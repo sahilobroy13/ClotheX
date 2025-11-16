@@ -3,6 +3,7 @@ import connectDb from "./config/db";
 import bcrypt from "bcrypt";
 import { UserModel } from "./Models/user";
 import jsonwebtoken from "jsonwebtoken";
+import { productModel } from "./Models/product";
 
 const app = express();
 const saltRound = 5;
@@ -47,6 +48,43 @@ app.post("/api/v1/signin",async(req,res)=>{
     res.json({token : token});
     
 })
+
+app.post("/api/v1/products", async(req ,res)=>{
+    const product = req.body;
+    try {
+        await productModel.create({
+            ...req.body,
+
+        })
+        res.json("product added !");
+    } catch (error) {
+        console.log("something went wrong ", error);
+    }
+})
+
+app.get("/api/v1/products", async(req,res)=>{
+    const allProducts = await productModel.find();
+    res.json(allProducts);
+})
+
+app.get("/api/v1/products/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+    console.log(productId);
+    const product = await productModel.findById(productId);
+    
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
+
+  } catch (error) {
+    //@ts-ignore
+    res.status(500).json({ message: error.message });
+  }
+});
+
 
 app.listen(3000,()=>{
     console.log("Server is listening on port 3000");
